@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice - <%= invoice.invoiceNumber %></title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.4;
+            color: #333;
+            background: #fff;
+        }
+        
+        .invoice-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: white;
+        }
+        
+        .invoice-header {
+            border-bottom: 3px solid #007bff;
+            padding-bottom: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .company-info {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .company-name {
+            font-size: 28px;
+            font-weight: bold;
+            color: #007bff;
+            margin-bottom: 5px;
+        }
+        
+        .company-details {
+            font-size: 12px;
+            color: #666;
+            line-height: 1.5;
+        }
+        
+        .invoice-title {
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            margin: 20px 0;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 5px;
+        }
+        
+        .invoice-meta {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+        }
+        
+        .invoice-details, .customer-details {
+            width: 48%;
+        }
+        
+        .section-title {
+            font-size: 14px;
+            font-weight: bold;
+            color: #007bff;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 5px;
+        }
+        
+        .detail-row {
+            display: flex;
+            margin-bottom: 5px;
+            font-size: 12px;
+        }
+        
+        .detail-label {
+            font-weight: bold;
+            width: 100px;
+            color: #555;
+        }
+        
+        .detail-value {
+            flex: 1;
+            color: #333;
+        }
+        
+        .trip-section {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        
+        .trip-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        .trip-route {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 15px;
+            background: white;
+            border-radius: 5px;
+            border: 2px solid #007bff;
+            margin-bottom: 15px;
+        }
+        
+        .route-text {
+            font-size: 16px;
+            font-weight: bold;
+            color: #007bff;
+        }
+        
+        .route-arrow {
+            margin: 0 10px;
+            font-size: 20px;
+        }
+        
+        .fare-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            font-size: 12px;
+        }
+        
+        .fare-table th {
+            background: #007bff;
+            color: white;
+            padding: 10px;
+            text-align: left;
+            font-weight: bold;
+        }
+        
+        .fare-table td {
+            padding: 8px 10px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .fare-table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+        
+        .amount-cell {
+            text-align: right;
+            font-weight: bold;
+        }
+        
+        .total-section {
+            background: #007bff;
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+        
+        .total-amount {
+            font-size: 18px;
+            font-weight: bold;
+        }
+        
+        .amount-words {
+            background: #e9ecef;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+            font-style: italic;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        
+        .footer-section {
+            border-top: 2px solid #eee;
+            padding-top: 20px;
+            text-align: center;
+            font-size: 11px;
+            color: #666;
+        }
+        
+        .payment-info {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 5px;
+            padding: 10px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .notes-section {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            border-left: 4px solid #007bff;
+        }
+        
+        @media print {
+            .invoice-container {
+                max-width: 100%;
+                margin: 0;
+                padding: 10px;
+            }
+            
+            body {
+                print-color-adjust: exact;
+                -webkit-print-color-adjust: exact;
+            }
+        }
+        
+        .gst-row {
+            color: #dc3545;
+            font-weight: bold;
+        }
+        
+        .subtotal-row {
+            border-top: 2px solid #007bff;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="invoice-container">
+        <!-- Header -->
+        <div class="invoice-header">
+            <div class="company-info">
+                <div class="company-name">🚖 <%= invoice.company.name %></div>
+                <div class="company-details">
+                    <%= invoice.company.address %><br>
+                    Phone: <%= invoice.company.phone %> | Email: <%= invoice.company.email %><br>
+                    <% if (invoice.company.website) { %>Website: <%= invoice.company.website %><br><% } %>
+                    <strong>GST No: <%= invoice.company.gst %></strong>
+                </div>
+            </div>
+        </div>
+        
+        <div class="invoice-title">TAX INVOICE</div>
+        
+        <!-- Invoice Meta Information -->
+        <div class="invoice-meta">
+            <div class="invoice-details">
+                <div class="section-title">Invoice Details</div>
+                <div class="detail-row">
+                    <span class="detail-label">Invoice No:</span>
+                    <span class="detail-value"><%= invoice.invoiceNumber %></span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Date:</span>
+                    <span class="detail-value"><%= invoice.date %></span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Time:</span>
+                    <span class="detail-value"><%= invoice.time %></span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Payment:</span>
+                    <span class="detail-value"><%= invoice.paymentMethod %></span>
+                </div>
+            </div>
+            
+            <div class="customer-details">
+                <div class="section-title">Bill To</div>
+                <div class="detail-row">
+                    <span class="detail-label">Name:</span>
+                    <span class="detail-value"><%= invoice.customer.name %></span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Phone:</span>
+                    <span class="detail-value"><%= invoice.customer.phone %></span>
+                </div>
+                <% if (invoice.customer.email) { %>
+                <div class="detail-row">
+                    <span class="detail-label">Email:</span>
+                    <span class="detail-value"><%= invoice.customer.email %></span>
+                </div>
+                <% } %>
+                <% if (invoice.customer.gst) { %>
+                <div class="detail-row">
+                    <span class="detail-label">GST No:</span>
+                    <span class="detail-value"><%= invoice.customer.gst %></span>
+                </div>
+                <% } %>
+                <% if (invoice.customer.address) { %>
+                <div class="detail-row">
+                    <span class="detail-label">Address:</span>
+                    <span class="detail-value"><%= invoice.customer.address %></span>
+                </div>
+                <% } %>
+            </div>
+        </div>
+        
+        <!-- Trip Information -->
+        <div class="trip-section">
+            <div class="section-title">Trip Details</div>
+            
+            <div class="trip-route">
+                <div class="route-text">
+                    <%= invoice.trip.pickupLocation %>
+                    <span class="route-arrow">➡️</span>
+                    <%= invoice.trip.dropLocation %>
+                </div>
+            </div>
+            
+            <div class="trip-details">
+                <div>
+                    <div class="detail-row">
+                        <span class="detail-label">Pickup:</span>
+                        <span class="detail-value"><%= invoice.trip.pickupDate %> at <%= invoice.trip.pickupTime %></span>
+                    </div>
+                    <% if (invoice.trip.dropTime) { %>
+                    <div class="detail-row">
+                        <span class="detail-label">Drop:</span>
+                        <span class="detail-value"><%= invoice.trip.dropDate %> at <%= invoice.trip.dropTime %></span>
+                    </div>
+                    <% } %>
+                    <% if (invoice.trip.distance > 0) { %>
+                    <div class="detail-row">
+                        <span class="detail-label">Distance:</span>
+                        <span class="detail-value"><%= invoice.trip.distance %> KM</span>
+                    </div>
+                    <% } %>
+                </div>
+                
+                <div>
+                    <div class="detail-row">
+                        <span class="detail-label">Vehicle:</span>
+                        <span class="detail-value"><%= invoice.trip.vehicleType %></span>
+                    </div>
+                    <% if (invoice.trip.vehicleNumber) { %>
+                    <div class="detail-row">
+                        <span class="detail-label">Vehicle No:</span>
+                        <span class="detail-value"><%= invoice.trip.vehicleNumber %></span>
+                    </div>
+                    <% } %>
+                    <% if (invoice.trip.driverName) { %>
+                    <div class="detail-row">
+                        <span class="detail-label">Driver:</span>
+                        <span class="detail-value"><%= invoice.trip.driverName %></span>
+                    </div>
+                    <% } %>
+                    <% if (invoice.trip.duration) { %>
+                    <div class="detail-row">
+                        <span class="detail-label">Duration:</span>
+                        <span class="detail-value"><%= invoice.trip.duration %></span>
+                    </div>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Fare Breakdown -->
+        <table class="fare-table">
+            <thead>
+                <tr>
+                    <th>Description</th>
+                    <th style="text-align: center;">Qty/Rate</th>
+                    <th style="text-align: right;">Amount (<%= invoice.fare.currency %>)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% if (invoice.fare.baseFare > 0) { %>
+                <tr>
+                    <td>Base Fare</td>
+                    <td style="text-align: center;">1</td>
+                    <td class="amount-cell"><%= invoice.fare.baseFare.toFixed(2) %></td>
+                </tr>
+                <% } %>
+                
+                <% if (invoice.fare.distanceFare > 0) { %>
+                <tr>
+                    <td>Distance Charges (<%= invoice.trip.distance %> KM)</td>
+                    <td style="text-align: center;">₹<%= (invoice.fare.distanceFare / invoice.trip.distance).toFixed(2) %>/KM</td>
+                    <td class="amount-cell"><%= invoice.fare.distanceFare.toFixed(2) %></td>
+                </tr>
+                <% } %>
+                
+                <% if (invoice.fare.timeFare > 0) { %>
+                <tr>
+                    <td>Waiting Time Charges</td>
+                    <td style="text-align: center;">-</td>
+                    <td class="amount-cell"><%= invoice.fare.timeFare.toFixed(2) %></td>
+                </tr>
+                <% } %>
+                
+                <% if (invoice.fare.tolls > 0) { %>
+                <tr>
+                    <td>Tolls</td>
+                    <td style="text-align: center;">-</td>
+                    <td class="amount-cell"><%= invoice.fare.tolls.toFixed(2) %></td>
+                </tr>
+                <% } %>
+                
+                <% if (invoice.fare.parking > 0) { %>
+                <tr>
+                    <td>Parking Charges</td>
+                    <td style="text-align: center;">-</td>
+                    <td class="amount-cell"><%= invoice.fare.parking.toFixed(2) %></td>
+                </tr>
+                <% } %>
+                
+                <% if (invoice.fare.extraCharges > 0) { %>
+                <tr>
+                    <td>Extra Charges</td>
+                    <td style="text-align: center;">-</td>
+                    <td class="amount-cell"><%= invoice.fare.extraCharges.toFixed(2) %></td>
+                </tr>
+                <% } %>
+                
+                <tr class="subtotal-row">
+                    <td colspan="2"><strong>Subtotal</strong></td>
+                    <td class="amount-cell"><strong><%= invoice.fare.subtotal.toFixed(2) %></strong></td>
+                </tr>
+                
+                <% if (invoice.fare.cgst > 0) { %>
+                <tr class="gst-row">
+                    <td>CGST @ <%= (invoice.fare.gstRate / 2).toFixed(1) %>%</td>
+                    <td style="text-align: center;">-</td>
+                    <td class="amount-cell"><%= invoice.fare.cgst.toFixed(2) %></td>
+                </tr>
+                <% } %>
+                
+                <% if (invoice.fare.sgst > 0) { %>
+                <tr class="gst-row">
+                    <td>SGST @ <%= (invoice.fare.gstRate / 2).toFixed(1) %>%</td>
+                    <td style="text-align: center;">-</td>
+                    <td class="amount-cell"><%= invoice.fare.sgst.toFixed(2) %></td>
+                </tr>
+                <% } %>
+            </tbody>
+        </table>
+        
+        <!-- Total Amount -->
+        <div class="total-section">
+            <div class="total-row">
+                <span>Total Amount:</span>
+                <span class="total-amount">₹ <%= invoice.fare.totalAmount.toFixed(2) %></span>
+            </div>
+        </div>
+        
+        <!-- Amount in Words -->
+        <div class="amount-words">
+            <strong>Amount in Words:</strong> <%= invoice.fare.totalInWords %>
+        </div>
+        
+        <!-- Payment Information -->
+        <div class="payment-info">
+            <strong>Payment Method:</strong> <%= invoice.paymentMethod %>
+        </div>
+        
+        <!-- Notes -->
+        <% if (invoice.notes && invoice.notes.trim()) { %>
+        <div class="notes-section">
+            <div class="section-title">Notes</div>
+            <p><%= invoice.notes %></p>
+        </div>
+        <% } %>
+        
+        <!-- Footer -->
+        <div class="footer-section">
+            <p><strong>Thank you for choosing <%= invoice.company.name %>!</strong></p>
+            <p>This is a computer generated invoice and does not require a signature.</p>
+            <p>For any queries, please contact us at <%= invoice.company.phone %> or <%= invoice.company.email %></p>
+            <br>
+            <p style="font-size: 10px; color: #999;">
+                Generated on <%= invoice.date %> at <%= invoice.time %>
+            </p>
+        </div>
+    </div>
+</body>
+</html>

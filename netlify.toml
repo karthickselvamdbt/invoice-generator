@@ -1,0 +1,27 @@
+# Netlify Configuration
+[build]
+  publish = "public"
+  functions = "netlify/functions"
+
+[functions]
+  node_bundler = "esbuild"
+
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/:splat"
+  status = 200
+
+[[redirects]]
+  from = "/generate-invoice"
+  to = "/.netlify/functions/generate-invoice"
+  status = 200
+
+[[redirects]]
+  from = "/preview-invoice"
+  to = "/.netlify/functions/preview-invoice"
+  status = 200
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
